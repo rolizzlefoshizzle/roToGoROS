@@ -1,0 +1,23 @@
+<launch>
+
+ <node pkg="ro-to-go" type="managerRobustness.py" name="manager">
+ </node>
+
+ <node pkg="ro-to-go" type="initiator.py" name="initiator">
+ </node>
+
+ <node pkg="ro-to-go" type="logger.py" name="logger">
+ </node>
+
+ <node pkg="ro-to-go" type="plannerRobustness.py" name="longHorz">
+ </node>
+
+ <node pkg="ro-to-go" type="truther.py" name="predicates">
+ </node>
+
+ <node pkg="ro-to-go" type="controller.py" name="controller">
+ </node>
+
+ <rosparam file="$(find ro-to-go)/config/params.yaml" />
+
+</launch>
