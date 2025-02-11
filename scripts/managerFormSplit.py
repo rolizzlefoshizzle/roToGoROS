@@ -4,13 +4,13 @@ import numpy as np
 from std_msgs.msg import String, Bool, Float64MultiArray, Float64
 import stlrom
 import time
-import rcpeLib
+import rcpe
 
 # todo: add cleanup process to allow multiple motion planning runs
 
 
-def initialize_driver(formulaStr):
-    testMonitor = rcpeLib.rcpeManager(
+def initialize_driver(formulaStr, circRadius):
+    testMonitor = rcpe.rcpeManager(
         "signal x, y, xe, ye")
     testMonitor.add_predicate("x[t]>0")
     testMonitor.add_predicate("x[t]>4")
@@ -19,16 +19,20 @@ def initialize_driver(formulaStr):
     testMonitor.add_predicate("y[t]>4")
     testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<1")
-    testMonitor.add_predicate(
-        "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<0.25", "region")
 
     testMonitor.addSubform(
         "((x[t]>4)&(y[t]>4))&((x[t]<5)&(y[t]<5))", "goal")
+    testMonitor.add_predicate(
+        "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<"+str(circRadius), "region")
 
     if formulaStr == 'stayIn.stl':
         testMonitor.setFormula(
             "(F[0,10](G[0,3](region)))&(F[15,20](goal))")
         timeHorz = 10.0
+    elif formulaStr == 'reachAvoid.stl':
+        testMonitor.setFormula(
+            "(G[0,60](!(region)))&(F[50,60](goal))")
+        timeHorz = 60
     elif formulaStr == 'long.stl':
         testMonitor.setFormula(
             # there was a bug in the RoSI tool where the time domain of a predicate nested inside of a nested eventually was incorrect, leading to a non-monotonically decreasing upper bound, which is incorrect and hurt planning performance. region&region forces a conjunction in there to sidestep the bug.
@@ -69,6 +73,8 @@ class manager:
 
         self.logDt = rospy.get_param("/stlEvaluationDt")
 
+        self.circRadius = rospy.get_param("/regionRadiusSquared")
+
         ###############################
         # initialize node information #
         ###############################
@@ -104,7 +110,8 @@ class manager:
 
     def receive_user_in(self, data):
         """initialize monitor with given formula, and enable planners"""
-        self.testMonitor, self.timeHorz = initialize_driver(data.data)
+        self.testMonitor, self.timeHorz = initialize_driver(
+            data.data, self.circRadius)
         maxMemoryVal = self.testMonitor.getMaxMemory()
         self.memory = np.array([]).reshape([0, 7])
         self.logMemoryVal.publish(data=maxMemoryVal)

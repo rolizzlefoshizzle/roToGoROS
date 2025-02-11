@@ -8,7 +8,7 @@ import formulaProgression
 # todo: add cleanup process to allow multiple motion planning runs
 
 
-def initialize_driver(dim, formulaStr):
+def initialize_driver(dim, formulaStr, circRadius):
     testMonitor = formulaProgression.stlManager(
         dim, "signal x, y, xe, ye")
     testMonitor.add_axis_aligned_predicate(0, True, 0, "x[t]>0")
@@ -17,26 +17,24 @@ def initialize_driver(dim, formulaStr):
     testMonitor.add_axis_aligned_predicate(1, True, 0, "y[t]>0")
     testMonitor.add_axis_aligned_predicate(1, True, 4, "y[t]>4")
     testMonitor.add_axis_aligned_predicate(1, False, 5, "y[t]<5")
-    myCircStr = "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<0.25"
-    testMonitor.add_dynamic_circle_predicate(
-        0, 2, 1, 3, 0.25, myCircStr)
-
-    print("HEY I MADE IT HERE AT LEAST")
-    testMonitor.addSubform(
-        myCircStr, "region")
-    print("but did i make it here?")
-
     testMonitor.addSubform(
         "((x[t]>4)&(y[t]>4))&((x[t]<5)&(y[t]<5))", "goal")
-    print("but did i make it here part two?")
+
+    myCircStr = "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<" + \
+        str(circRadius)
+    testMonitor.add_dynamic_circle_predicate(
+        0, 2, 1, 3, 0.25, myCircStr)
+    testMonitor.addSubform(
+        myCircStr, "region")
 
     if formulaStr == 'stayIn.stl':
         testMonitor.setFormula(
             "(F[0,10](G[0,3](region)))&(F[15,20](goal))")
-
-        # testMonitor.setFormula(
-        #     "F[15,20](goal)")
         timeHorz = 10.0
+    elif formulaStr == 'reachAvoid.stl':
+        testMonitor.setFormula(
+            "(G[0,60](!(region)))&(F[50,60](goal))")
+        timeHorz = 60
     elif formulaStr == 'long.stl':
         testMonitor.setFormula(
             # there was a bug in the RoSI tool where the time domain of a predicate nested inside of a nested eventually was incorrect, leading to a non-monotonically decreasing upper bound, which is incorrect and hurt planning performance. region&region forces a conjunction in there to sidestep the bug.
@@ -70,6 +68,8 @@ class manager:
         self.logTime = 0
 
         self.logDt = rospy.get_param("/stlEvaluationDt")
+
+        self.circRadius = rospy.get_param("/regionRadiusSquared")
 
         ###############################
         # initialize node information #
@@ -109,7 +109,8 @@ class manager:
 
     def receive_user_in(self, data):
         """initialize monitor with given formula, and enable planners"""
-        self.testMonitor, self.timeHorz = initialize_driver(4, data.data)
+        self.testMonitor, self.timeHorz = initialize_driver(
+            4, data.data, self.circRadius)
         maxMemoryVal = self.testMonitor.getMaxMemory()
         self.logMemoryVal.publish(data=maxMemoryVal)
         # publish planning
@@ -129,18 +130,8 @@ class manager:
             self.testMonitor.update_formula(obsservation)
             self.floatDataToPublish.data = time.time() - startTime
             driverString = self.testMonitor.printDriver()
-            self.stateObservationsLogTopic.publish(data)
-            self.formulaTopic.publish(driverString)
             self.driver.add_sample(obsservation)
             robs = self.driver.get_online_rob("phi")
-            self.dataToPublish.data = robs
-            self.rosiTopic.publish(self.dataToPublish)
-            self.logTime = self.logTime + self.logDt
-            self.logMonitorTime.publish(self.floatDataToPublish)
-            self.floatDataToPublish.data = self.logTime
-            self.logManagerTime.publish(self.floatDataToPublish)
-            self.floatDataToPublish.data = self.testMonitor.getFormulaSize()
-            self.logFormulaSize.publish(self.floatDataToPublish)
             if (robs[1] >= 0) & (self.logTime >= self.timeHorz):
                 rospy.loginfo("Success!!")
                 self.planningTopic.publish(0)
@@ -149,6 +140,16 @@ class manager:
                 rospy.loginfo("Failure :(")
                 self.planningTopic.publish(0)
                 self.programRunning = False
+            self.stateObservationsLogTopic.publish(data)
+            self.formulaTopic.publish(driverString)
+            self.dataToPublish.data = robs
+            self.rosiTopic.publish(self.dataToPublish)
+            self.logTime = self.logTime + self.logDt
+            self.logMonitorTime.publish(self.floatDataToPublish)
+            self.floatDataToPublish.data = self.logTime
+            self.logManagerTime.publish(self.floatDataToPublish)
+            self.floatDataToPublish.data = self.testMonitor.getFormulaSize()
+            self.logFormulaSize.publish(self.floatDataToPublish)
 
     def run(self):
         """Monitor the system execution"""

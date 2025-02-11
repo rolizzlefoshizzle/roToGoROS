@@ -50,6 +50,9 @@ class plotter:
         # boolean to plot inputs
         self.plotAccels = rospy.get_param("/plotAccel")
 
+        # circle's radius
+        self.circRadius = np.sqrt(rospy.get_param("/regionRadiusSquared"))
+
         # initialize node
         rospy.init_node('plotter', anonymous=True)
 
@@ -113,7 +116,7 @@ class plotter:
         longLine, = axis.plot([], [], 'c-')
         shortLine, = axis.plot([], [], 'g-')
         trajectory, = axis.plot([], [], 'b-')
-        obs = patches.Circle((0, 0), radius=0.5, facecolor="black")
+        obs = patches.Circle((0, 0), radius=self.circRadius, facecolor="black")
         goal = patches.Rectangle((4, 4), 1, 1, facecolor="green")
         other = patches.Rectangle((4, 0), 1, 1, facecolor="gray")
         if self.plotAccels:
