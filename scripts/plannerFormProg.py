@@ -223,6 +223,7 @@ class planner:
             'logPlanTime', Float64, queue_size=10)
         self.logCost = rospy.Publisher(
             'logCost', Float64, queue_size=10)
+        self.success = rospy.Publisher('highPlanGood', Bool, queue_size=10)
 
         # initialize node
         rospy.init_node('planner', anonymous=True)
@@ -326,9 +327,11 @@ class planner:
                     self.vpsto.set_initial_guess(mu_ref)
                     self.vpsto.opt.sigma_init = rospy.get_param(
                         "/globalSigmaWarmStart")
+                    self.success.publish(True)
                 else:
                     self.vpsto.opt.sigma_init = rospy.get_param(
                         "/globalSigmaInit")
+                    self.success.publish(False)
                 self.floatDataToPublish.data = self.realTime
                 self.logExecTime.publish(self.floatDataToPublish)
                 self.floatDataToPublish.data = planTime

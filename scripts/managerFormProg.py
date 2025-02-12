@@ -23,7 +23,7 @@ def initialize_driver(dim, formulaStr, circRadius):
     myCircStr = "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<" + \
         str(circRadius)
     testMonitor.add_dynamic_circle_predicate(
-        0, 2, 1, 3, 0.25, myCircStr)
+        0, 2, 1, 3, circRadius, myCircStr)
     testMonitor.addSubform(
         myCircStr, "region")
 
@@ -35,6 +35,12 @@ def initialize_driver(dim, formulaStr, circRadius):
         testMonitor.setFormula(
             "(G[0,60](!(region)))&(F[50,60](goal))")
         timeHorz = 60
+    elif formulaStr == 'stayIn2.stl':
+        # testMonitor.setFormula(
+        #     "(G[0,10](region))&(F[10,20](goal))")
+        testMonitor.setFormula(
+            "G[0,20](region)")
+        timeHorz = 20
     elif formulaStr == 'long.stl':
         testMonitor.setFormula(
             # there was a bug in the RoSI tool where the time domain of a predicate nested inside of a nested eventually was incorrect, leading to a non-monotonically decreasing upper bound, which is incorrect and hurt planning performance. region&region forces a conjunction in there to sidestep the bug.

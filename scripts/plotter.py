@@ -137,6 +137,7 @@ class plotter:
             longLine.set_data(self.longPlan[:, 0], self.longPlan[:, 1])
             longLine.set_linestyle(self.longLinestyle)
             shortLine.set_data(self.shortPlan[:, 0], self.shortPlan[:, 1])
+            shortLine.set_linestyle(self.longLinestyle)
             if self.plotAccels:
                 a.remove()
                 b.remove()

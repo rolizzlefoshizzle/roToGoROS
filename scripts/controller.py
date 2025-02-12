@@ -36,6 +36,9 @@ class executor:
         # time resolution with which to discretize the system
         self.dt = rospy.get_param("/executionDt")
 
+        # time resolution with which to discretize the system
+        self.track = rospy.get_param("/trackingController")
+
         # define the A and B matrices of the DT linear system
         self.A = np.array(
             [[1, 0, self.dt, 0], [0, 1, 0, self.dt], [0, 0, 1, 0], [0, 0, 0, 1]])
@@ -104,11 +107,12 @@ class executor:
                 # publish the final and nominal control input
                 nominal = self.trajectory[index, 5:]
 
-                # self.dataToPublish.data = (np.hstack((
-                #     correction + nominal, nominal))).tolist()
-
-                self.dataToPublish.data = (np.hstack((
-                    nominal, nominal))).tolist()
+                if self.track:
+                    self.dataToPublish.data = (np.hstack((
+                        correction + nominal, nominal))).tolist()
+                else:
+                    self.dataToPublish.data = (np.hstack((
+                        nominal, nominal))).tolist()
 
                 self.inputTopic.publish(self.dataToPublish)
 

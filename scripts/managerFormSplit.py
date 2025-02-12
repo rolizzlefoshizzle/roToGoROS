@@ -33,6 +33,12 @@ def initialize_driver(formulaStr, circRadius):
         testMonitor.setFormula(
             "(G[0,60](!(region)))&(F[50,60](goal))")
         timeHorz = 60
+    elif formulaStr == 'stayIn2.stl':
+        # testMonitor.setFormula(
+        #     "(G[0,10]((region)&(region)))&(F[10,20](goal))")
+        testMonitor.setFormula(
+            "G[0,20](region)")
+        timeHorz = 20
     elif formulaStr == 'long.stl':
         testMonitor.setFormula(
             # there was a bug in the RoSI tool where the time domain of a predicate nested inside of a nested eventually was incorrect, leading to a non-monotonically decreasing upper bound, which is incorrect and hurt planning performance. region&region forces a conjunction in there to sidestep the bug.
@@ -145,9 +151,11 @@ class manager:
             # print(obsservation)
             self.driver.add_sample(obsservation)
             robs = self.driver.get_online_rob("phi")
-            # print("\nTime: " + str(self.logTime))
-            # print("Robustness:")
-            # print(robs)
+            print("\nTime: " + str(self.logTime))
+            print("Robustness:")
+            print(robs)
+            # print("rcpe formula:")
+            # print(driverString)
             # print(robs)
             # driver = stlrom.STLDriver()
             # driver.parse_string(driverString)
@@ -169,7 +177,7 @@ class manager:
             self.logTime = self.logTime + self.logDt
             self.floatDataToPublish.data = self.logTime
             self.logManagerTime.publish(self.floatDataToPublish)
-            if (robs[1] >= 0) & (self.logTime >= self.timeHorz):
+            if (robs[1] >= 0) | (self.logTime >= self.timeHorz):
                 rospy.loginfo("Success!!")
                 self.planningTopic.publish(0)
                 self.programRunning = False
