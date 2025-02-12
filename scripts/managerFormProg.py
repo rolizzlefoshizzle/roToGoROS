@@ -132,11 +132,11 @@ class manager:
             driverString = self.testMonitor.printDriver()
             self.driver.add_sample(obsservation)
             robs = self.driver.get_online_rob("phi")
-            if (robs[1] >= 0) & (self.logTime >= self.timeHorz):
+            if (robs[1] >= 0) | ("true" in driverString):
                 rospy.loginfo("Success!!")
                 self.planningTopic.publish(0)
                 self.programRunning = False
-            if robs[2] < 0:
+            if robs[2] < 0 | ("false" in driverString):
                 rospy.loginfo("Failure :(")
                 self.planningTopic.publish(0)
                 self.programRunning = False

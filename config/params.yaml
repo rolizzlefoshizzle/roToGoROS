@@ -36,7 +36,7 @@ globalMaxIter: 50
 globalTmax: 10
 globalVerbose: 0
 shortHorzDt: 0.2
-localViaPoints: 1
+localViaPoints: 2
 localPopSize: 10
 localSigmaInit: 10
 localSigmaWarmStart: 2
