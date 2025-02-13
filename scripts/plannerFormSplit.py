@@ -109,6 +109,7 @@ class Loss():
         # find the total loss
         cost_limits = self.loss_limits(pop)
         # cost_stl = self.loss_stl_particles(pop)
+        startTime = time.time()
         if self.cppCost:
             cost_stl = self.loss_stl_cpp(pop)
         else:
@@ -270,6 +271,8 @@ class planner:
                 # take a snapshot of the current real history
                 snapshot = np.copy(self.memory)
                 self.loss.driver = stlrom.STLDriver()
+                # print("\n remaining formula:")
+                # print(self.remainingFormula)
                 success = self.loss.driver.parse_string(self.remainingFormula)
                 while (not success):
                     success = self.loss.driver.parse_string(
@@ -304,6 +307,8 @@ class planner:
                     dqT=np.zeros_like(self.startPos)
                 )
                 planTime = time.time() - startTime
+                # print("plan time:")
+                # print(planTime)
                 ##################
                 # Process Output #
                 ##################
@@ -338,14 +343,15 @@ class planner:
                 # use cost to publish "good plan boolean" and warm start next
                 # plan
                 # rospy.loginfo(sol.c_best)
-                if (sol.c_best < 0) & (rospy.get_param("/useWarmStart")):
-                    via_indices = np.linspace(
-                        0, len(X)-1, self.vpsto.opt.N_via+1, dtype=int)[1:]
-                    mu_ref = X[via_indices].flatten()
-                    self.vpsto.set_initial_guess(mu_ref)
-                    self.vpsto.opt.sigma_init = rospy.get_param(
-                        "/globalSigmaWarmStart")
-                    self.success.publish(True)
+                if (sol.c_best < 0):
+                    if (rospy.get_param("/useWarmStart")):
+                        self.success.publish(True)
+                        via_indices = np.linspace(
+                            0, len(X)-1, self.vpsto.opt.N_via+1, dtype=int)[1:]
+                        mu_ref = X[via_indices].flatten()
+                        self.vpsto.set_initial_guess(mu_ref)
+                        self.vpsto.opt.sigma_init = rospy.get_param(
+                            "/globalSigmaWarmStart")
                 else:
                     self.vpsto.opt.sigma_init = rospy.get_param(
                         "/globalSigmaInit")

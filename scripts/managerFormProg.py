@@ -12,13 +12,34 @@ def initialize_driver(dim, formulaStr, circRadius):
     testMonitor = formulaProgression.stlManager(
         dim, "signal x, y, xe, ye")
     testMonitor.add_axis_aligned_predicate(0, True, 0, "x[t]>0")
+    testMonitor.add_axis_aligned_predicate(0, True, 0.5, "x[t]>0.5")
     testMonitor.add_axis_aligned_predicate(0, True, 4, "x[t]>4")
+    testMonitor.add_axis_aligned_predicate(0, True, 4, "(2*x[t])>8")
     testMonitor.add_axis_aligned_predicate(0, False, 5, "x[t]<5")
+    testMonitor.add_axis_aligned_predicate(0, False, 5, "(2*x[t])<10")
+    testMonitor.add_axis_aligned_predicate(0, False, 1, "x[t]<1")
     testMonitor.add_axis_aligned_predicate(1, True, 0, "y[t]>0")
     testMonitor.add_axis_aligned_predicate(1, True, 4, "y[t]>4")
+    testMonitor.add_axis_aligned_predicate(1, True, 2, "y[t]>2")
+    testMonitor.add_axis_aligned_predicate(1, True, 2, "(2*y[t])>4")
+    testMonitor.add_axis_aligned_predicate(1, True, 2.6, "y[t]>2.6")
     testMonitor.add_axis_aligned_predicate(1, False, 5, "y[t]<5")
+    testMonitor.add_axis_aligned_predicate(1, False, 3, "y[t]<3")
+    testMonitor.add_axis_aligned_predicate(1, False, 3, "(2*y[t])<6")
+    testMonitor.add_axis_aligned_predicate(1, False, 2.4, "y[t]<2.4")
     testMonitor.addSubform(
-        "((x[t]>4)&(y[t]>4))&((x[t]<5)&(y[t]<5))", "goal")
+        "((x[t]>0.5)&(y[t]>0))&((x[t]<1)&(y[t]<2.4))", "blockLow")
+    testMonitor.addSubform(
+        "((x[t]>0.5)&(y[t]<5))&((x[t]<1)&(y[t]>2.6))", "blockHigh")
+
+    testMonitor.addSubform(
+        "(((2*x[t])>8)&((2*y[t])>4))&(((2*x[t])<10)&((2*y[t])<6))", "goal")
+
+    # testMonitor.addSubform(
+    #     "(x[t]>4)", "goal")
+    #
+    # testMonitor.addSubform(
+    #     "((x[t]>4)&(y[t]>2))&((x[t]<5)&(y[t]<3))", "goal")
 
     myCircStr = "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<" + \
         str(circRadius)
@@ -26,11 +47,16 @@ def initialize_driver(dim, formulaStr, circRadius):
         0, 2, 1, 3, circRadius, myCircStr)
     testMonitor.addSubform(
         myCircStr, "region")
+    testMonitor.addSubform("(region)|((blockLow)|(blockHigh))", "collision")
 
     if formulaStr == 'stayIn.stl':
         testMonitor.setFormula(
             "(F[0,10](G[0,3](region)))&(F[15,20](goal))")
         timeHorz = 10.0
+    if formulaStr == 'thinGap.stl':
+        testMonitor.setFormula(
+            "(G[0,20](!(collision)))&(F[15,20](goal))")
+        timeHorz = 20.0
     elif formulaStr == 'reachAvoid.stl':
         testMonitor.setFormula(
             "(G[0,60](!(region)))&(F[50,60](goal))")
@@ -99,9 +125,6 @@ class manager:
         self.logManagerTime = rospy.Publisher(
             'logManagerTime', Float64, queue_size=10)
 
-        self.logFormulaSize = rospy.Publisher(
-            'logFormulaSize', Float64, queue_size=10)
-
         self.logMemoryVal = rospy.Publisher(
             'logMemoryVal', Float64, queue_size=10)
 
@@ -154,8 +177,6 @@ class manager:
             self.logMonitorTime.publish(self.floatDataToPublish)
             self.floatDataToPublish.data = self.logTime
             self.logManagerTime.publish(self.floatDataToPublish)
-            self.floatDataToPublish.data = self.testMonitor.getFormulaSize()
-            self.logFormulaSize.publish(self.floatDataToPublish)
 
     def run(self):
         """Monitor the system execution"""

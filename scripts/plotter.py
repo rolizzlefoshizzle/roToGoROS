@@ -26,6 +26,9 @@ class plotter:
         # empty robot trajectory
         self.roboTrajectory = np.array([]).reshape(0, 2)
 
+        # empty robot trajectory
+        self.circleTrajectory = np.array([]).reshape(0, 2)
+
         # predicate positions
         self.pred = [rospy.get_param("/xe0"), rospy.get_param("/ye0")]
 
@@ -53,6 +56,9 @@ class plotter:
         # circle's radius
         self.circRadius = np.sqrt(rospy.get_param("/regionRadiusSquared"))
 
+        # plotted objects
+        self.objects = []
+
         # initialize node
         rospy.init_node('plotter', anonymous=True)
 
@@ -72,6 +78,17 @@ class plotter:
         if (not data.data):
             self.programRunning = False
 
+    def make_objects(self):
+        """initialize objects for given formula"""
+        formula = rospy.get_param("/userInFormula")
+        if (formula == "thinGap.stl"):
+            self.objects.append(patches.Rectangle(
+                (4, 2), 1, 1, facecolor="green"))
+            self.objects.append(patches.Rectangle(
+                (0.5, 0), 0.5, 2.4, facecolor="gray"))
+            self.objects.append(patches.Rectangle(
+                (0.5, 2.6), 0.5, 2.4, facecolor="gray"))
+
     def received_input(self, data):
         """receive and save commanded input"""
         self.input = np.array(data.data[0:2]).reshape(2, 1)
@@ -83,6 +100,8 @@ class plotter:
     def observe(self, data):
         """receive and save true robot state, predicate state, and time"""
         self.pred = data.data[5:]
+        self.circleTrajectory = np.vstack((
+            self.circleTrajectory, np.array(self.pred).reshape(1, 2)))
         self.roboPos = data.data[1:3]
         self.roboTrajectory = np.vstack((
             self.roboTrajectory, np.array(self.roboPos).reshape(1, 2)))
@@ -116,23 +135,29 @@ class plotter:
         longLine, = axis.plot([], [], 'c-')
         shortLine, = axis.plot([], [], 'g-')
         trajectory, = axis.plot([], [], 'b-')
+        # trajectory2, = axis.plot([], [], 'r-')
+        self.make_objects()
         obs = patches.Circle((0, 0), radius=self.circRadius, facecolor="black")
-        goal = patches.Rectangle((4, 4), 1, 1, facecolor="green")
-        other = patches.Rectangle((4, 0), 1, 1, facecolor="gray")
         if self.plotAccels:
             a = axis.arrow(self.roboPos[0], self.roboPos[1],
                            self.input[0][0], self.input[1][0], width=0.05)
             b = axis.arrow(self.roboPos[0], self.roboPos[1],
                            self.nominalInput[0][0], self.nominalInput[1][0], ls='--', width=0.05)
-        axis.add_patch(goal)
         axis.add_patch(obs)
-        axis.add_patch(other)
+        print("self.objects:")
+        print(self.objects)
+        for shape in self.objects:
+            print("shape:")
+            print(shape)
+            axis.add_patch(shape)
         # define rate
         rate = rospy.Rate(50)
         # main loop
         while not rospy.is_shutdown() and self.programRunning:
             trajectory.set_data(self.roboTrajectory[:, 0],
                                 self.roboTrajectory[:, 1])
+            # trajectory2.set_data(self.circleTrajectory[:, 0],
+            #                      self.circleTrajectory[:, 1])
             point.set_data([self.roboPos[0]], [self.roboPos[1]])
             longLine.set_data(self.longPlan[:, 0], self.longPlan[:, 1])
             longLine.set_linestyle(self.longLinestyle)
