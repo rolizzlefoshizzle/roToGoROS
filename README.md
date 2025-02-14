@@ -1,56 +1,69 @@
-# Via-Point Based Stochastic Trajectory Optimization for Signal Temporal Logic
-This repo is a [ROS](https://www.ros.org/) (1) implementation of the algorithm in [this paper](https://www.youtube.com/watch?v=dQw4w9WgXcQ) by Ilyes et al.
+#dependencies:
+Install these to the same python environment/instance that ros uses
+## RCPELib
+```
+git clone https://github.com/rolizzlefoshizzle/RCPELib
+cd RCPELib
+cd stl_rom_library
+git clone https://github.com/decyphir/STLRom
+cd STLRom
+pip install .
+cd ../..
+mkdir build
+cd build
+cmake ..
+make
+cd .. 
+pip install .
+```
 
-## Intallation 
-Install the code using 
-`git clone https://github.com/rolizzlefoshizzle/stlVpStoROS`
+## STLFormulaProgression
+```
+git clone https://github.com/rolizzlefoshizzle/STLFormulaProgression
+cd STLFormulaProgression/
+mkdir build 
+cd build 
+cmake ..
+make 
+cd ..
+pip install .
+```
 
-#### Dependencies 
-This repo relies on a couple other dependencies
+## VP-STO
+```
+git clone -b jax-dev https://github.com/JuJankowski/vp-sto
+pip install .
+```
 
-First, make sure to create your vitual environment if you're using one. Make sure to install 
-- matplotlib
-- jax cpu (using `pip install --upgrade "jax[cpu]"`)
+## Others
+```
+pip install matplotlib numpy
+```
 
-**Important**: Be sure to set the path to the virtual environment in the launch file
+# ros package
+## Installation
+In catkin_ws/src:
+```
+git clone https://github.com/rolizzlefoshizzle/roToGoROS
+cd ..
+catkin_make
+```
 
-Next install [STLRom](https://github.com/decyphir/STLRom)(within the stlVpSto directory) and follow the build instructions:
-
-`git clone https://github.com/decyphir/STLRom` 
-
-As of November 2023, the build instructions are
-
-`cd STLRom/build`
-
-`cmake ..`
-
-`make`
-
-Finally, install [Vp-Sto (the jax-dev branch)](https://github.com/JuJankowski/vp-sto/tree/jax-dev)(within the stlVpSto directory) and follow the build instructions:
-
-`git clone https://github.com/JuJankowski/vp-sto/tree/jax-dev`
-
-As of November 2023, the build instructions are
-
-`cd vp-sto`
-
-`pip install .`
-
+**Important**: 
 ## Usage
-In one terminal, launch the system using  
-`roslaunch ro-to-go FIXME.launch --screen`
+- If using a specific python virtualenvironment: set the path in the `mac<blahBlah>.launch` files and use those
+- Otherwise, use the `'linux<blahBlah>.launch` files
+- launch files ending wiht "Plot" visualize the sim (the ones without it are for benchmarking purposes)
+- the launch files with 
+    - "rob" use regular robustness with the original formula 
+    - "rcpe" use rcpe to update the formula and allow for bounded memory 
+    - "RoToGo" use formula progression to update the formula and allow for robustness-to-go
+- Run with `roslaunch ro-to-go CASE.launch --screen`
+    - if it complains about a missing directory in 'bagFiles,' just make that directory rq
+        - I'll turn logging off eventually
+- Configure package in config/params.yaml
+    - most interesting formulas for "userInFormula" are stayIn2.stl and thinGap.stl
 
-Then, in the second terminal, publish the formula you'd like to execute:
-`rostopic pub /userCommand std_msgs/String "data: '<the formula>.stl'"`
+- **At the moment, just use rcpe and ro-to-go!** I think i haven't updated rob yet
 
-Formulas are located in the scripts/formulas directory. Specify which formula to plan for in the command above
 
-The following parameters can be changed in the launch file:
-- time resolution for evaluating STL robustness of MPC rollouts
-- time delay between local planner calls (unused)
-- time delay between global planner calls (unused)
-- period of control input durations
-- time resolution of truthing system
-- variance of gaussian noise applied to predicate states
-- initial robot position and velocity 
-- initial predicate positions
