@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import roslaunch
 import rospy
 import rospkg

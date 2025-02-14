@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # license removed for brevity
 import rospy
 from std_msgs.msg import String, Bool, Float64MultiArray, Float64

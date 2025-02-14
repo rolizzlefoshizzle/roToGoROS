@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # license removed for brevity
 from vpsto.vpsto import VPSTO, VPSTOOptions
 import rospy
