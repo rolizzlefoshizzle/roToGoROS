@@ -11,9 +11,9 @@ source .venv/bin/activate
 cd external_libraries
 ```
 
-# Dependencies
-Install these to the same python environment/instance that ros uses
-## RCPELib
+## Dependencies
+Install these to your new virtual environment. **Important**: for now clone these with ssh instead of https 
+### RCPELib
 ```
 git clone https://github.com/rolizzlefoshizzle/RCPELib
 cd RCPELib
@@ -30,8 +30,9 @@ cd ..
 pip install .
 cd ..
 ```
+**Note**: The dependency STLRom requires python > 3.10. if the venv is using an older version, you can go into their setup.py and change that to a lower value (hehe)
 
-## STLFormulaProgression
+### STLFormulaProgression
 ```
 git clone https://github.com/rolizzlefoshizzle/STLFormulaProgression
 cd STLFormulaProgression/
@@ -44,7 +45,7 @@ pip install .
 cd ..
 ```
 
-## VP-STO
+### VP-STO
 ```
 git clone -b jax-dev https://github.com/JuJankowski/vp-sto
 cd vp-sto
@@ -52,32 +53,26 @@ pip install .
 cd ..
 ```
 
-## Others
+### Others
 ```
 pip install matplotlib numpy control empy catkin_pkg jax catkin_tools jaxlib rospkg
 cd ..
 ```
 
-# ros package
-## Installation
+## ros package
+### Installation
 In catkin_ws/src:
 ```
 git clone https://github.com/rolizzlefoshizzle/roToGoROS
 cd ..
 catkin_make
 ```
-
-**Important**: 
-## Usage
+### Usage
 - launch files ending wiht "Plot" visualize the sim (the ones without it are for benchmarking purposes)
 - the launch files with 
     - "rob" use regular robustness with the original formula 
     - "rcpe" use rcpe to update the formula and allow for bounded memory 
-    - "RoToGo" use formula progression to update the formula and allow for robustness-to-go
+    - "rotogo" use formula progression to update the formula and allow for robustness-to-go
 - Run with `roslaunch ro-to-go CASE.launch --screen`
 - Configure package in config/params.yaml
     - most interesting formulas for "userInFormula" are stayIn2.stl and thinGap.stl
-
-- **At the moment, just use rcpe and ro-to-go!** I think i haven't updated rob yet
-
-
