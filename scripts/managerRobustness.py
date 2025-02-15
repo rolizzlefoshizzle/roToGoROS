@@ -12,29 +12,51 @@ def initialize_driver(formulaStr, circRadius):
     testMonitor = rcpe.rcpeManager(
         "signal x, y, xe, ye")
     testMonitor.add_predicate("x[t]>0")
+    testMonitor.add_predicate("x[t]>0.5")
     testMonitor.add_predicate("x[t]>4")
+    testMonitor.add_predicate("(2*x[t])>8")
     testMonitor.add_predicate("x[t]<5")
+    testMonitor.add_predicate("x[t]<1")
+    testMonitor.add_predicate("(2*x[t])<10")
     testMonitor.add_predicate("y[t]>0")
     testMonitor.add_predicate("y[t]>4")
+    testMonitor.add_predicate("(2*y[t])>4")
     testMonitor.add_predicate("y[t]<5")
+    testMonitor.add_predicate("y[t]<2.4")
+    testMonitor.add_predicate("y[t]>2.6")
+    testMonitor.add_predicate("y[t]<3")
+    testMonitor.add_predicate("(2*y[t])<6")
     testMonitor.add_predicate("y[t]<1")
+    testMonitor.addSubform(
+        "((x[t]>0.5)&(y[t]>0))&((x[t]<1)&(y[t]<2.4))", "blockLow")
+    testMonitor.addSubform(
+        "((x[t]>0.5)&(y[t]<5))&((x[t]<1)&(y[t]>2.6))", "blockHigh")
 
     testMonitor.addSubform(
-        "((x[t]>4)&(y[t]>4))&((x[t]<5)&(y[t]<5))", "goal")
+        "(((2*x[t])>8)&((2*y[t])>4))&(((2*x[t])<10)&((2*y[t])<6))", "goal")
+
+    # testMonitor.addSubform(
+    #     "((x[t]>4)&(y[t]>2))&((x[t]<5)&(y[t]<3))", "goal")
+
     testMonitor.add_predicate(
         "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<"+str(circRadius), "region")
+    testMonitor.addSubform("(region)|((blockLow)|(blockHigh))", "collision")
 
     if formulaStr == 'stayIn.stl':
         testMonitor.setFormula(
             "(F[0,10](G[0,3](region)))&(F[15,20](goal))")
         timeHorz = 10.0
+    if formulaStr == 'thinGap.stl':
+        testMonitor.setFormula(
+            "(G[0,20](!(collision)))&(F[15,20](goal))")
+        timeHorz = 20.0
     elif formulaStr == 'reachAvoid.stl':
         testMonitor.setFormula(
-            "(G[0,20](!(region)))&(F[0,20](goal))")
+            "(G[0,60](!(region)))&(F[50,60](goal))")
         timeHorz = 60
     elif formulaStr == 'stayIn2.stl':
         # testMonitor.setFormula(
-        #     "(G[0,10](region&region))&(F[10,20](goal))")
+        #     "(G[0,10]((region)&(region)))&(F[10,20](goal))")
         testMonitor.setFormula(
             "G[0,20](region)")
         timeHorz = 20

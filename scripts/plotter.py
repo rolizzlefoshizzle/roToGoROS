@@ -145,11 +145,7 @@ class plotter:
             b = axis.arrow(self.roboPos[0], self.roboPos[1],
                            self.nominalInput[0][0], self.nominalInput[1][0], ls='--', width=0.05)
         axis.add_patch(obs)
-        print("self.objects:")
-        print(self.objects)
         for shape in self.objects:
-            print("shape:")
-            print(shape)
             axis.add_patch(shape)
         # define rate
         rate = rospy.Rate(50)

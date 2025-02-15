@@ -1,7 +1,5 @@
 <launch>
 
- <arg name="venv" value="/opt/miniconda3/envs/ros_env/bin/python3" />
-
  <node pkg="ro-to-go" type="managerFormProg.py" name="manager">
  </node>
 
@@ -11,16 +9,16 @@
  <node pkg="ro-to-go" type="logger.py" name="logger">
  </node>
 
- <node pkg="ro-to-go" type="plannerFormProg.py" name="longHorz" launch-prefix = "$(arg venv)" >
+ <node pkg="ro-to-go" type="plannerFormProg.py" name="longHorz">
  </node>
 
  <node pkg="ro-to-go" type="truther.py" name="predicates">
  </node>
 
- <node pkg="ro-to-go" type="controller.py" name="controller" launch-prefix = "$(arg venv)" >
+ <node pkg="ro-to-go" type="controller.py" name="controller">
  </node>
 
- <node pkg="ro-to-go" type="plotter.py" name="plotter" launch-prefix = "$(arg venv)" >
+ <node pkg="ro-to-go" type="plotter.py" name="plotter">
  </node>
 
  <rosparam file="$(find ro-to-go)/config/params.yaml" />

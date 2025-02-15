@@ -4,6 +4,7 @@ from std_msgs.msg import Bool
 import subprocess
 import rospkg
 import os
+from pathlib import Path
 
 # a lot of help from https://answers.ros.org/question/10714/start-and-stop-rosbag-within-a-python-script/
 
@@ -33,6 +34,7 @@ class logger:
         rospack = rospkg.RosPack()
         path = rospack.get_path('ro-to-go')
         directory = path + "/bagFiles/" + benchTest + "/" + formula
+        Path(directory).mkdir(parents=True, exist_ok=True)
         bagName = rospy.get_param("/bagFileName")
 
         self.rosbag_proc = subprocess.Popen(

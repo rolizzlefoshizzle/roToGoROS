@@ -1,7 +1,7 @@
-userInFormula: stayIn2.stl
+userInFormula: thinGap.stl
 bagFileName: generic.bag
 benchTest: random
-regionRadiusSquared: 2
+regionRadiusSquared: 0.25
 trackingController: 0
 plotAccel: 0
 cppFindCost: 0
@@ -10,8 +10,8 @@ useWarmStart: 1
 stlEvaluationDt: 0.1
 executionDt: 0.02
 truthDt: 0.005
-x0: 3.5
-y0: 3.5
+x0: 0.5
+y0: 2.5
 vx0: 0
 vy0: 0
 controllerR: 1

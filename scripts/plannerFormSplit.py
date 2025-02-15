@@ -110,7 +110,6 @@ class Loss():
         # find the total loss
         cost_limits = self.loss_limits(pop)
         # cost_stl = self.loss_stl_particles(pop)
-        startTime = time.time()
         if self.cppCost:
             cost_stl = self.loss_stl_cpp(pop)
         else:

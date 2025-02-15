@@ -1,3 +1,16 @@
+# Welcome 
+## Create Catkin Workspace and virtual environment
+```
+mkdir catkin_ws 
+cd catkin_ws 
+mkdir src 
+cd src 
+mkdir external_libraries
+python -m venv .venv
+source .venv/bin/activate
+cd external_libraries
+```
+
 # Dependencies
 Install these to the same python environment/instance that ros uses
 ## RCPELib
@@ -15,6 +28,7 @@ cmake ..
 make
 cd .. 
 pip install .
+cd ..
 ```
 
 ## STLFormulaProgression
@@ -27,17 +41,21 @@ cmake ..
 make 
 cd ..
 pip install .
+cd ..
 ```
 
 ## VP-STO
 ```
 git clone -b jax-dev https://github.com/JuJankowski/vp-sto
+cd vp-sto
 pip install .
+cd ..
 ```
 
 ## Others
 ```
-pip install matplotlib numpy
+pip install matplotlib numpy control empy catkin_pkg jax catkin_tools jaxlib rospkg
+cd ..
 ```
 
 # ros package
@@ -51,16 +69,12 @@ catkin_make
 
 **Important**: 
 ## Usage
-- If using a specific python virtualenvironment: set the path in the `mac<blahBlah>.launch` files and use those
-- Otherwise, use the `'linux<blahBlah>.launch` files
 - launch files ending wiht "Plot" visualize the sim (the ones without it are for benchmarking purposes)
 - the launch files with 
     - "rob" use regular robustness with the original formula 
     - "rcpe" use rcpe to update the formula and allow for bounded memory 
     - "RoToGo" use formula progression to update the formula and allow for robustness-to-go
 - Run with `roslaunch ro-to-go CASE.launch --screen`
-    - if it complains about a missing directory in 'bagFiles,' just make that directory rq
-        - I'll turn logging off eventually
 - Configure package in config/params.yaml
     - most interesting formulas for "userInFormula" are stayIn2.stl and thinGap.stl
 

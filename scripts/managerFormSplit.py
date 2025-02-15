@@ -4,7 +4,6 @@ import rospy
 import numpy as np
 from std_msgs.msg import String, Bool, Float64MultiArray, Float64
 import stlrom
-import time
 import rcpe
 
 # todo: add cleanup process to allow multiple motion planning runs
@@ -21,13 +20,11 @@ def initialize_driver(formulaStr, circRadius):
     testMonitor.add_predicate("x[t]<1")
     testMonitor.add_predicate("(2*x[t])<10")
     testMonitor.add_predicate("y[t]>0")
-    testMonitor.add_predicate("y[t]>2")
     testMonitor.add_predicate("y[t]>4")
     testMonitor.add_predicate("(2*y[t])>4")
     testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<2.4")
     testMonitor.add_predicate("y[t]>2.6")
-    testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<3")
     testMonitor.add_predicate("(2*y[t])<6")
     testMonitor.add_predicate("y[t]<1")
