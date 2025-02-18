@@ -28,10 +28,10 @@ def init_launch(launchfile, process_listener):
     return launch
 
 
-numRuns = 50
-formula = 'stayIn.stl'
+numRuns = 100
+formula = 'stayIn2.stl'
 # methods = ["formSplitRob", "robustness"]
-methods = ["formSplitRob"]
+methods = ["rob", "rotogo"]
 
 rospack = rospkg.RosPack()
 path = rospack.get_path('ro-to-go')
@@ -44,6 +44,7 @@ for method in methods:
             y = yaml.safe_load(f)
             y['userInFormula'] = formula
             y['bagFileName'] = method + str(i) + ".bag"
+            y['benchTest'] = "benching"
             rospy.set_param("/bagFileName", method +
                             "Test" + str(i+1) + ".bag")
             print(yaml.dump(y, default_flow_style=False, sort_keys=False))
