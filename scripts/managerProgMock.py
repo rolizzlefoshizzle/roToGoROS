@@ -116,25 +116,13 @@ class manager:
         ###############################
         # define topics to publish to
         self.planningTopic = rospy.Publisher(
-            'planning', Bool, queue_size=10)
+            'planningMock', Bool, queue_size=10)
 
         self.formulaTopic = rospy.Publisher(
-            'remainingFormula', String, queue_size=10)
+            'remainingFormulaMock', String, queue_size=10)
 
         self.stateObservationsLogTopic = rospy.Publisher(
-            'stateObservations', Float64MultiArray, queue_size=10)
-
-        self.rosiTopic = rospy.Publisher(
-            'rosi', Float64MultiArray, queue_size=10)
-
-        self.logMonitorTime = rospy.Publisher(
-            'logMonitorTime', Float64, queue_size=10)
-
-        self.logManagerTime = rospy.Publisher(
-            'logManagerTime', Float64, queue_size=10)
-
-        self.logMemoryVal = rospy.Publisher(
-            'logMemoryVal', Float64, queue_size=10)
+            'stateObservationsMock', Float64MultiArray, queue_size=10)
 
         # initialize node
         rospy.init_node('manager', anonymous=True)
@@ -148,8 +136,6 @@ class manager:
         """initialize monitor with given formula, and enable planners"""
         self.testMonitor, self.timeHorz = initialize_driver(
             4, data.data, self.circRadius)
-        maxMemoryVal = self.testMonitor.getMaxMemory()
-        self.logMemoryVal.publish(data=maxMemoryVal)
         # publish planning
         self.planningTopic.publish(1)
         self.formulaTopic.publish(self.testMonitor.printDriver())
@@ -180,11 +166,8 @@ class manager:
             self.stateObservationsLogTopic.publish(data)
             self.formulaTopic.publish(driverString)
             self.dataToPublish.data = robs
-            self.rosiTopic.publish(self.dataToPublish)
             self.logTime = self.logTime + self.logDt
-            self.logMonitorTime.publish(self.floatDataToPublish)
             self.floatDataToPublish.data = self.logTime
-            self.logManagerTime.publish(self.floatDataToPublish)
 
     def run(self):
         """Monitor the system execution"""
