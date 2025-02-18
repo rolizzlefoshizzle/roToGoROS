@@ -82,7 +82,7 @@ class plotter:
     def make_objects(self):
         """initialize objects for given formula"""
         formula = rospy.get_param("/userInFormula")
-        if (formula == "thinGap.stl"):
+        if ("thinGap" in formula):
             self.objects.append(patches.Rectangle(
                 (4, 2), 1, 1, facecolor="green"))
             self.objects.append(patches.Rectangle(
