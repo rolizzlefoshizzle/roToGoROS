@@ -206,6 +206,7 @@ include_directories(
 # catkin_add_nosetests(test)
 catkin_install_python(PROGRAMS 
   scripts/managerFormProg.py
+  scripts/managerProgMock.py
   scripts/managerFormSplit.py
   scripts/managerRobustness.py
   scripts/initiator.py
@@ -217,5 +218,7 @@ catkin_install_python(PROGRAMS
   scripts/plannerFormProg.py
   scripts/plannerFormSplit.py
   scripts/plannerRobustness.py
+  scripts/plannerProgMock.py
+  scripts/plannerRobMock.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

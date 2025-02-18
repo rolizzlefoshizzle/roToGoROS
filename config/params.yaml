@@ -2,6 +2,7 @@ userInFormula: thinGap.stl
 bagFileName: generic.bag
 benchTest: random
 regionRadiusSquared: 0.25
+xTrigValue: 1.5
 trackingController: 0
 plotAccel: 0
 cppFindCost: 0
@@ -20,7 +21,7 @@ xVelLim: 0.5
 yVelLim: 0.5
 xAccLim: 1
 yAccLim: 1
-predicateSigma: 3
+predicateSigma: 0
 xe0: 3
 ye0: 2.5
 xBoundLow: 0

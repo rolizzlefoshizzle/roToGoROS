@@ -19,11 +19,13 @@ def initialize_driver(formulaStr, circRadius):
     testMonitor.add_predicate("x[t]<1")
     testMonitor.add_predicate("(2*x[t])<10")
     testMonitor.add_predicate("y[t]>0")
+    testMonitor.add_predicate("y[t]>2")
     testMonitor.add_predicate("y[t]>4")
     testMonitor.add_predicate("(2*y[t])>4")
     testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<2.4")
     testMonitor.add_predicate("y[t]>2.6")
+    testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<3")
     testMonitor.add_predicate("(2*y[t])<6")
     testMonitor.add_predicate("y[t]<1")
@@ -34,6 +36,9 @@ def initialize_driver(formulaStr, circRadius):
 
     testMonitor.addSubform(
         "(((2*x[t])>8)&((2*y[t])>4))&(((2*x[t])<10)&((2*y[t])<6))", "goal")
+
+    testMonitor.addSubform(
+        "((x[t]>4)&(y[t]>2))&((x[t]<5)&(y[t]<3))", "goal2")
 
     # testMonitor.addSubform(
     #     "((x[t]>4)&(y[t]>2))&((x[t]<5)&(y[t]<3))", "goal")
@@ -47,6 +52,10 @@ def initialize_driver(formulaStr, circRadius):
             "(F[0,10](G[0,3](region)))&(F[15,20](goal))")
         timeHorz = 10.0
     if formulaStr == 'thinGap.stl':
+        testMonitor.setFormula(
+            "(G[0,20](!(collision)))&(F[15,20](goal2))")
+        timeHorz = 20.0
+    if formulaStr == 'thinGapWeighted.stl':
         testMonitor.setFormula(
             "(G[0,20](!(collision)))&(F[15,20](goal))")
         timeHorz = 20.0
