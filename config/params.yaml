@@ -1,4 +1,4 @@
-userInFormula: thinGap.stl
+userInFormula: stayIn2.stl
 bagFileName: generic.bag
 benchTest: random
 regionRadiusSquared: 0.25
@@ -11,8 +11,8 @@ useWarmStart: 1
 stlEvaluationDt: 0.1
 executionDt: 0.02
 truthDt: 0.005
-x0: 0.5
-y0: 2.5
+x0: 3.5
+y0: 3.5
 vx0: 0
 vy0: 0
 controllerR: 1
@@ -33,7 +33,7 @@ boundLossWeight: 100000000
 globalViaPoints: 4
 globalPopSize: 25
 globalSigmaInit: 10
-globalSigmaWarmStart: 2
+globalSigmaWarmStart: 5
 globalMaxIter: 20
 globalTmax: 20
 globalVerbose: 0
