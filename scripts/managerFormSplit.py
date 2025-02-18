@@ -5,6 +5,7 @@ import numpy as np
 from std_msgs.msg import String, Bool, Float64MultiArray, Float64
 import stlrom
 import rcpe
+import math
 
 # todo: add cleanup process to allow multiple motion planning runs
 
@@ -20,11 +21,13 @@ def initialize_driver(formulaStr, circRadius):
     testMonitor.add_predicate("x[t]<1")
     testMonitor.add_predicate("(2*x[t])<10")
     testMonitor.add_predicate("y[t]>0")
+    testMonitor.add_predicate("y[t]>2")
     testMonitor.add_predicate("y[t]>4")
     testMonitor.add_predicate("(2*y[t])>4")
     testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<2.4")
     testMonitor.add_predicate("y[t]>2.6")
+    testMonitor.add_predicate("y[t]<5")
     testMonitor.add_predicate("y[t]<3")
     testMonitor.add_predicate("(2*y[t])<6")
     testMonitor.add_predicate("y[t]<1")
@@ -44,6 +47,7 @@ def initialize_driver(formulaStr, circRadius):
 
     testMonitor.add_predicate(
         "(((x[t]-xe[t])*(x[t]-xe[t]))+((y[t]-ye[t])*(y[t]-ye[t])))<"+str(circRadius), "region")
+
     testMonitor.addSubform("(region)|((blockLow)|(blockHigh))", "collision")
 
     if formulaStr == 'stayIn.stl':
@@ -63,8 +67,6 @@ def initialize_driver(formulaStr, circRadius):
             "(G[0,60](!(region)))&(F[50,60](goal))")
         timeHorz = 60
     elif formulaStr == 'stayIn2.stl':
-        # testMonitor.setFormula(
-        #     "(G[0,10]((region)&(region)))&(F[10,20](goal))")
         testMonitor.setFormula(
             "G[0,20](region)")
         timeHorz = 20
@@ -108,7 +110,11 @@ class manager:
 
         self.logDt = rospy.get_param("/stlEvaluationDt")
 
-        self.circRadius = rospy.get_param("/regionRadiusSquared")
+        self.circRadiusSquared = rospy.get_param("/regionRadiusSquared")
+
+        self.last_observation = []
+
+        self.trajLen = 0
 
         ###############################
         # initialize node information #
@@ -129,6 +135,12 @@ class manager:
         self.rosiTopic = rospy.Publisher(
             'rosi', Float64MultiArray, queue_size=10)
 
+        self.trajLenTopic = rospy.Publisher(
+            'trajLen', Float64, queue_size=10)
+
+        self.distFromCircTopic = rospy.Publisher(
+            'distFromCirc', Float64, queue_size=10)
+
         self.logManagerTime = rospy.Publisher(
             'logManagerTime', Float64, queue_size=10)
 
@@ -146,7 +158,7 @@ class manager:
     def receive_user_in(self, data):
         """initialize monitor with given formula, and enable planners"""
         self.testMonitor, self.timeHorz = initialize_driver(
-            data.data, self.circRadius)
+            data.data, self.circRadiusSquared)
         maxMemoryVal = self.testMonitor.getMaxMemory()
         self.memory = np.array([]).reshape([0, 7])
         self.logMemoryVal.publish(data=maxMemoryVal)
@@ -214,6 +226,24 @@ class manager:
                 rospy.loginfo("Failure :(")
                 self.planningTopic.publish(0)
                 self.programRunning = False
+            newX = obsservation[1]
+            newY = obsservation[2]
+            newXe = obsservation[3]
+            newYe = obsservation[4]
+            if len(self.last_observation) > 0:
+                oldX = self.last_observation[1]
+                oldY = self.last_observation[2]
+                dist = math.sqrt(((newX-oldX)*(newX-oldX)) +
+                                 ((newY-oldY)*(newY-oldY)))
+                self.trajLen = self.trajLen + dist
+                self.floatDataToPublish.data = self.trajLen
+                self.trajLenTopic.publish(self.floatDataToPublish)
+            self.last_observation = obsservation
+            distFromCenter = math.sqrt(((newX-newXe)*(newX-newXe)) +
+                                       ((newY-newYe)*(newY-newYe)))
+            distFromCircle = distFromCenter - math.sqrt(self.circRadiusSquared)
+            self.floatDataToPublish.data = distFromCircle
+            self.distFromCircTopic.publish(self.floatDataToPublish)
 
     def run(self):
         """Monitor the system execution"""

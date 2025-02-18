@@ -5,6 +5,7 @@ from std_msgs.msg import String, Bool, Float64MultiArray, Float64
 import stlrom
 import time
 import formulaProgression
+import math
 
 # todo: add cleanup process to allow multiple motion planning runs
 
@@ -109,7 +110,11 @@ class manager:
 
         self.logDt = rospy.get_param("/stlEvaluationDt")
 
-        self.circRadius = rospy.get_param("/regionRadiusSquared")
+        self.circRadiusSquared = rospy.get_param("/regionRadiusSquared")
+
+        self.last_observation = []
+
+        self.trajLen = 0
 
         ###############################
         # initialize node information #
@@ -126,6 +131,12 @@ class manager:
 
         self.rosiTopic = rospy.Publisher(
             'rosi', Float64MultiArray, queue_size=10)
+
+        self.trajLenTopic = rospy.Publisher(
+            'trajLen', Float64, queue_size=10)
+
+        self.distFromCircTopic = rospy.Publisher(
+            'distFromCirc', Float64, queue_size=10)
 
         self.logMonitorTime = rospy.Publisher(
             'logMonitorTime', Float64, queue_size=10)
@@ -147,7 +158,7 @@ class manager:
     def receive_user_in(self, data):
         """initialize monitor with given formula, and enable planners"""
         self.testMonitor, self.timeHorz = initialize_driver(
-            4, data.data, self.circRadius)
+            4, data.data, self.circRadiusSquared)
         maxMemoryVal = self.testMonitor.getMaxMemory()
         self.logMemoryVal.publish(data=maxMemoryVal)
         # publish planning
@@ -185,6 +196,24 @@ class manager:
             self.logMonitorTime.publish(self.floatDataToPublish)
             self.floatDataToPublish.data = self.logTime
             self.logManagerTime.publish(self.floatDataToPublish)
+            newX = obsservation[1]
+            newY = obsservation[2]
+            newXe = obsservation[3]
+            newYe = obsservation[4]
+            if len(self.last_observation) > 0:
+                oldX = self.last_observation[1]
+                oldY = self.last_observation[2]
+                dist = math.sqrt(((newX-oldX)*(newX-oldX)) +
+                                 ((newY-oldY)*(newY-oldY)))
+                self.trajLen = self.trajLen + dist
+                self.floatDataToPublish.data = self.trajLen
+                self.trajLenTopic.publish(self.floatDataToPublish)
+            self.last_observation = obsservation
+            distFromCenter = math.sqrt(((newX-newXe)*(newX-newXe)) +
+                                       ((newY-newYe)*(newY-newYe)))
+            distFromCircle = distFromCenter - math.sqrt(self.circRadiusSquared)
+            self.floatDataToPublish.data = distFromCircle
+            self.distFromCircTopic.publish(self.floatDataToPublish)
 
     def run(self):
         """Monitor the system execution"""
