@@ -85,7 +85,8 @@ class Loss():
 
     def candidate_stl_loss(self, candidate):
         # just the future states
-        stateSignal = np.hstack((self.t_eval, candidate))
+        # shifted b/c formula is for next timestep
+        stateSignal = np.hstack((self.t_eval[0:-1], candidate[1:]))
         # future states and predicates (assumed constant)
         signal = np.hstack((stateSignal, np.tile(
             self.predSigs, (stateSignal.shape[0], 1))))

@@ -149,7 +149,7 @@ class manager:
     def receive_user_in(self, data):
         """initialize monitor with given formula, and enable planners"""
         self.testMonitor, self.timeHorz = initialize_driver(
-            data.data, self.circRadius)
+            data.data, self.circRadiusSquared)
         maxMemoryVal = self.testMonitor.getMaxMemory()
         self.logMemoryVal.publish(data=maxMemoryVal)
         # publish planning

@@ -175,7 +175,7 @@ class manager:
             obsservation = list(data.data[0:3])
             obsservation.extend(list(data.data[5:]))
             startTime = time.time()
-            self.testMonitor.update_formula(obsservation)
+            self.testMonitor.update_formula(obsservation[1:], self.logDt)
             self.floatDataToPublish.data = time.time() - startTime
             driverString = self.testMonitor.printDriver()
             self.driver.add_sample(obsservation)
